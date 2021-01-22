@@ -88,5 +88,5 @@ public:
 
 	void Highlight(bool bOn);
 
-	void SuccessEffect();
+	void SuccessEffect(UParticleSystem* pSystem);
 };

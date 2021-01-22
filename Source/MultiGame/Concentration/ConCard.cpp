@@ -8,6 +8,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/StaticMesh.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstance.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -168,6 +169,10 @@ void AConCard::Highlight(bool bOn)
 	}
 }
 
-void AConCard::SuccessEffect()
+void AConCard::SuccessEffect(UParticleSystem* pSystem)
 {
+	auto pos = CardMesh->GetComponentLocation();
+	pos.Y -= 1.f;
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), pSystem, pos);
+	
 }

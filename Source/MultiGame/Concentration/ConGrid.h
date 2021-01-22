@@ -11,6 +11,7 @@
 #include "ConCard.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/Texture2D.h"
+#include "Particles/ParticleSystem.h"
 #include "GameFramework/Actor.h"
 #include "ConGrid.generated.h"
 
@@ -49,6 +50,10 @@ public:
 	/** Curve for card flipping animation*/
 	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UConBaseUI> GameUIClass;
+
+	/** Match success particle system*/
+	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)
+	UParticleSystem* SuccessParticleSystem;
 	
     /** Number of cards on each grid row */
     UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)

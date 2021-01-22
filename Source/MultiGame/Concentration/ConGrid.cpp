@@ -23,9 +23,13 @@ AConGrid::AConGrid()
 		TEXT("CurveFloat'/Game/Concentration/FlipCurve.FlipCurve'"));
 	static ConstructorHelpers::FClassFinder<UConBaseUI> gameUIRef(
 		TEXT("/Game/Concentration/ConcentrationMatchUI"));
+	static ConstructorHelpers::FObjectFinderOptional<UParticleSystem> successPSysRef(
+		TEXT("ParticleSystem'/Game/Concentration/SuccessEffect.SuccessEffect'"));
+
 	
 	FlipCurve = curveRef.Get();
 	GameUIClass = gameUIRef.Class;
+	SuccessParticleSystem = successPSysRef.Get();
 	LoadTextures();
 }
 
@@ -166,8 +170,8 @@ void AConGrid::MatchCards(AConCard& card)
 			return;
 		}
 		// pair success effect
-		HoldingCard->SuccessEffect();
-		card.SuccessEffect();
+		HoldingCard->SuccessEffect(SuccessParticleSystem);
+		card.SuccessEffect(SuccessParticleSystem);
 	}
 	else
 	{
