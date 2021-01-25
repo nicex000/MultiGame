@@ -11,7 +11,6 @@
 
 
 #include "ConstructorHelpers.h"
-#include "ResourceManager.h"
 #include "Engine/World.h"
 
 // Sets default values

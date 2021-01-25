@@ -141,7 +141,7 @@ void AConCard::HandleClicked()
 		return;
 	}
 	//timeline -> https://unrealcpp.com/open-door-with-timeline/ timeline finished callback
-	startingRotation = CardMesh->RelativeRotation;
+	startingRotation = CardMesh->GetRelativeRotation();
 	rotationTimeline.PlayFromStart();
 }
 
