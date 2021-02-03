@@ -89,4 +89,6 @@ public:
 	void Highlight(bool bOn);
 
 	void SuccessEffect(UParticleSystem* pSystem);
+
+	void EnablePhysicsWithPush(float impulseStregth, float impulseOffset);
 };

@@ -16,6 +16,7 @@
 // Sets default values
 AConGrid::AConGrid()
 {
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnRoot"));
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	static ConstructorHelpers::FObjectFinderOptional<UCurveFloat> curveRef(
@@ -62,18 +63,19 @@ void AConGrid::BeginPlay()
 {
 	Super::BeginPlay();
 
-
-	std::vector<AConCard*> cards;
-	
-	for (int32 row = 0; row < FMath::CeilToInt((TotalPairs*2.f) / RowSize); ++row)
+	cards = {};
+	int32 maxRows = FMath::CeilToInt((TotalPairs * 2.f) / RowSize);
+	int32 col;
+	for (int32 row = 0; row < maxRows; ++row)
 	{
-		for (int32 col = 0; col < RowSize; ++col)
+		for (col = 0; col < RowSize; ++col)
 		{
 			const FVector location = FVector(
 				-row * BlockSpacing,
 				col * BlockSpacing,
 				0.f
-			);
+			) + GetActorLocation();
+			
 			//mem leaks
 			AConCard* newCard = GetWorld()->SpawnActor<AConCard>(location, FRotator(0, 0, 0));
 
@@ -90,10 +92,17 @@ void AConGrid::BeginPlay()
 			}
 		}
 	}
+	col = RowSize < cards.size() ? RowSize : cards.size();
+	float cameraDistanceX = col * CameraDistancePerCardX;
+	float cameraDistanceY = maxRows * CameraDistancePerCardY;
 
+	GetWorld()->GetFirstPlayerController()->GetViewTarget()->SetActorLocation(FVector(
+		-(maxRows - 1) * 0.5f * BlockSpacing,
+		(col - 1) * 0.5f * BlockSpacing,
+		(cameraDistanceX > cameraDistanceY ? cameraDistanceX : cameraDistanceY) + CameraZOffset
+	) + GetActorLocation());
 
 	std::vector<ECardType> enumList = cardTypes;
-	
 	
 	if (!ensureMsgf(enumList.size() >= cards.size() / 2, TEXT("Not enough pairs to match selected amount")))
 	{
@@ -112,35 +121,6 @@ void AConGrid::BeginPlay()
 		cards[i + TotalPairs]->SetType(enumList[i], texture);
 	}
 	
-	// using fmath rand
-	/*
-	int randomFirst = FMath::RandRange(0, cards.size());
-	int randomSecond = randomFirst;
-	for (int retry = 0; retry < 10; ++retry)
-	{
-		randomSecond = FMath::RandRange(0, cards.size());
-		if (randomSecond != randomFirst)
-		{
-			break;
-		}
-	}
-	
-	if (randomSecond == randomFirst)
-	{
-		if (ensureMsgf(cards.size() <= 1, TEXT("Issue creating cards, they weren't enough to make full pairs")))
-		{
-			randomFirst = 0;
-			randomSecond = 1;
-		}
-	}
-
-	cards[randomFirst]->Type = enumList[enumList.size() - 1];
-	cards[randomSecond]->Type = cards[randomFirst]->Type;
-	
-	enumList.pop_back();
-	cards.erase(cards.begin() + randomFirst);
-	cards.erase(cards.begin() + randomSecond);*/
-
 	gameUI = static_cast<UConBaseUI*>(CreateWidget(
 		GetWorld()->GetFirstPlayerController(), GameUIClass, "Game UI"));
 	gameUI->AddToViewport();
@@ -163,14 +143,16 @@ void AConGrid::MatchCards(AConCard& card)
 		MatchedPairs.push_back(card.Type);
 		gameUI->SuccessfulPairs->SetText(FText::FromString(FString::FromInt(MatchedPairs.size())));
 
-		if (MatchedPairs.size() >= TotalPairs)
-		{
-			//game success
-			return;
-		}
 		// pair success effect
 		HoldingCard->SuccessEffect(SuccessParticleSystem);
 		card.SuccessEffect(SuccessParticleSystem);
+		
+		if (MatchedPairs.size() >= TotalPairs)
+		{
+			//game success
+			EndMatch(true);
+			return;
+		}
 	}
 	else
 	{
@@ -181,6 +163,25 @@ void AConGrid::MatchCards(AConCard& card)
 	
 	HoldingCard = nullptr;
 	
+}
+
+void AConGrid::EndMatch(bool didWin)
+{
+	FTimerHandle fallTimerHandle, UITimeHandle;
+	GetWorldTimerManager().SetTimer(fallTimerHandle, [this]()
+		{
+			for (auto Card : cards)
+			{
+				Card->EnablePhysicsWithPush(ImpulseStrength, ImpulseOffset);
+			}
+		},
+	1, false, VictoryFallDelay);
+	GetWorldTimerManager().SetTimer(UITimeHandle, [this]()
+		{
+			gameUI->MatchQuit->SetVisibility(ESlateVisibility::Hidden);
+			gameUI->EndPanel->SetVisibility(ESlateVisibility::Visible);
+		},
+		1, false, VictoryScreenDelay + VictoryFallDelay);
 }
 
 UTexture2D* AConGrid::GetTextureOfType(ECardType type)

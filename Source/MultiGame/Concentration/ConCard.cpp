@@ -176,3 +176,12 @@ void AConCard::SuccessEffect(UParticleSystem* pSystem)
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), pSystem, pos);
 	
 }
+
+void AConCard::EnablePhysicsWithPush(float impulseStrength, float impulseOffset)
+{
+	CardMesh->SetSimulatePhysics(true);
+	FVector impulsePoint = CardMesh->GetComponentLocation();
+	impulsePoint.X += (FMath::RandBool() ? 1.f : -1.f) * impulseOffset;
+	impulsePoint.Y += (FMath::RandBool() ? 1.f : -1.f) * impulseOffset;
+	CardMesh->AddImpulseAtLocation(FVector::DownVector * impulseStrength, impulsePoint);
+}

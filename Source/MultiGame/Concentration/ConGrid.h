@@ -32,40 +32,65 @@ class AConGrid : public AActor
 	std::map<ECardType, UTexture2D*> cardTypeTextures;
 
 	UConBaseUI* gameUI;
-	
-public:	
-	// Sets default values for this actor's properties
-	AConGrid();
 
+	/** Card list */
+	std::vector<AConCard*> cards;
+	
 	/** Successful pairs */
 	std::vector<ECardType> MatchedPairs;
 
 	/** Attempts*/
 	int attempts = 0;
 
+	
+public:	
+	// Sets default values for this actor's properties
+	AConGrid();
+
 	/** Curve for card flipping animation*/
-	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Grid\|Assets", EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* FlipCurve;
 
 	/** Curve for card flipping animation*/
-	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Grid\|Assets", EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UConBaseUI> GameUIClass;
 
 	/** Match success particle system*/
-	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Grid\|Assets", EditAnywhere, BlueprintReadWrite)
 	UParticleSystem* SuccessParticleSystem;
-	
+
     /** Number of cards on each grid row */
-    UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
     int32 RowSize = 4;
 	
 	/** Number of pairs */
-	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
 	int32 TotalPairs = 8;
 
 	/** Spacing of blocks */
-	UPROPERTY(Category = Grid, EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
 	float BlockSpacing = 300;
+
+	UPROPERTY(Category = "Grid\|Camera", EditAnywhere, BlueprintReadWrite)
+	float CameraZOffset = 1000;
+
+	UPROPERTY(Category = "Grid\|Camera", EditAnywhere, BlueprintReadWrite)
+	float CameraDistancePerCardX = 100;
+
+	UPROPERTY(Category = "Grid\|Camera", EditAnywhere, BlueprintReadWrite)
+	float CameraDistancePerCardY = 200;
+	
+	UPROPERTY(Category = "Grid\|Impulse", EditAnywhere, BlueprintReadWrite)
+	float ImpulseStrength = 10000;
+
+	UPROPERTY(Category = "Grid\|Impulse", EditAnywhere, BlueprintReadWrite)
+	float ImpulseOffset = 40;
+
+	UPROPERTY(Category = "Grid", EditAnywhere, BlueprintReadWrite)
+	float VictoryFallDelay = 1.8f;
+
+	UPROPERTY(Category = "Grid", EditAnywhere, BlueprintReadWrite)
+	float VictoryScreenDelay = 1.f;
 
 private:
 	void LoadTextures();
@@ -77,6 +102,8 @@ protected:
 public:	
 	/** Handle the block being clicked */
 	void MatchCards(AConCard& card);
+
+	void EndMatch(bool didWin);
 
 	/** Returns DummyRoot subobject **/
 	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }

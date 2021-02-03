@@ -7,10 +7,23 @@ void UConBaseUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	//simpleButton->OnClicked.AddDynamic(this, &UConBaseUI::SimpleButtonClicked);
+	MatchQuit->OnClicked.AddDynamic(this, &UConBaseUI::QuitButtonClicked);
+	EndQuit->OnClicked.AddDynamic(this, &UConBaseUI::QuitButtonClicked);
+	EndSettings->OnClicked.AddDynamic(this, &UConBaseUI::SettingsButtonClicked);
+	EndRestart->OnClicked.AddDynamic(this, &UConBaseUI::RestartButtonClicked);
 }
 
-void UConBaseUI::SimpleButtonClicked()
+void UConBaseUI::QuitButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("The hardest button to button"));
+	UE_LOG(LogTemp, Warning, TEXT("i give up :) come back when there's a main menu"));
+}
+
+void UConBaseUI::SettingsButtonClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("still gotta do the settings ui :)"));
+}
+
+void UConBaseUI::RestartButtonClicked()
+{
+	UE_LOG(LogTemp, Warning, TEXT("restart or something, but first lemme fix them mem ~~leaks~~ leeks"));
 }

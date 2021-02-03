@@ -6,8 +6,10 @@
 #include "Blueprint/UserWidget.h"
 #include "Button.h"
 #include "TextBlock.h"
+#include "CanvasPanel.h"
 #include "ConBaseUI.generated.h"
 
+class UCanvasPanel;
 /**
  * 
  */
@@ -18,6 +20,7 @@ class MULTIGAME_API UConBaseUI : public UUserWidget
 
 	void NativeConstruct() override;
 public:
+
     UPROPERTY(meta = (BindWidget))
     UTextBlock* Attempts;
 	
@@ -27,6 +30,31 @@ public:
 	UPROPERTY(meta = (BindWidget))
     UTextBlock* SuccessfulPairs;
 
-    UFUNCTION()
-        void SimpleButtonClicked();
+	UPROPERTY(meta = (BindWidget))
+	UButton* MatchQuit;
+
+
+	// end screen stuff
+
+	UPROPERTY(meta = (BindWidget))
+	UCanvasPanel* EndPanel;
+	
+	UPROPERTY(meta = (BindWidget))
+	UButton* EndRestart;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* EndSettings;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* EndQuit;
+
+	UFUNCTION()
+	void QuitButtonClicked();
+	
+	UFUNCTION()
+	void SettingsButtonClicked();
+	
+	UFUNCTION()
+	void RestartButtonClicked();
+	
 };
