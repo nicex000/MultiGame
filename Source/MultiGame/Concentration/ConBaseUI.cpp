@@ -18,7 +18,7 @@ void UConBaseUI::NativeConstruct()
 
 void UConBaseUI::QuitButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("i give up :) come back when there's a main menu"));
+	UGameplayStatics::OpenLevel((UObject*)GetGameInstance(), FName(TEXT("MainMenuMap")));
 }
 
 void UConBaseUI::SettingsButtonClicked()
