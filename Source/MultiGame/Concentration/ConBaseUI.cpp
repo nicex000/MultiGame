@@ -2,6 +2,9 @@
 
 
 #include "ConBaseUI.h"
+#include "ConGrid.h"
+
+#include "Kismet/GameplayStatics.h"
 
 void UConBaseUI::NativeConstruct()
 {
@@ -20,10 +23,27 @@ void UConBaseUI::QuitButtonClicked()
 
 void UConBaseUI::SettingsButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("still gotta do the settings ui :)"));
+	if (SettingsUI)
+	{
+		SettingsUI->SetVisibility(ESlateVisibility::Visible);
+		SettingsUI->SetIsEnabled(true);
+	}
+	else if (SettingsUIClass)
+	{
+		SettingsUI = static_cast<UConSettingsBaseUI*>(CreateWidget(
+			GetWorld()->GetFirstPlayerController(), SettingsUIClass, "Settings UI"));
+		SettingsUI->AddToViewport(100);
+		SettingsUI->CancelBtn->OnClicked.AddDynamic(this, &UConBaseUI::SettingsExitClicked);
+	}
+}
+
+void UConBaseUI::SettingsExitClicked()
+{
+	SettingsUI->SetVisibility(ESlateVisibility::Collapsed);
+	SettingsUI->SetIsEnabled(false);
 }
 
 void UConBaseUI::RestartButtonClicked()
 {
-	UE_LOG(LogTemp, Warning, TEXT("restart or something, but first lemme fix them mem ~~leaks~~ leeks"));
+	gridRef->StartMatch();
 }

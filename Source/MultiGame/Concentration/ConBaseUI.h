@@ -7,7 +7,10 @@
 #include "Button.h"
 #include "TextBlock.h"
 #include "CanvasPanel.h"
+#include "ConSettingsBaseUI.h"
+
 #include "ConBaseUI.generated.h"
+class AConGrid;
 
 class UCanvasPanel;
 /**
@@ -33,9 +36,16 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* MatchQuit;
 
+	AConGrid* gridRef;
 
 	// end screen stuff
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UConSettingsBaseUI> SettingsUIClass;
+
+	UConSettingsBaseUI* SettingsUI;
+	
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* EndPanel;
 	
@@ -53,6 +63,9 @@ public:
 	
 	UFUNCTION()
 	void SettingsButtonClicked();
+
+	UFUNCTION()
+	void SettingsExitClicked();
 	
 	UFUNCTION()
 	void RestartButtonClicked();

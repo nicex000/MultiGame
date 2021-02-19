@@ -10,6 +10,7 @@
 
 
 
+#include "ConSettings.h"
 #include "ConstructorHelpers.h"
 #include "Engine/World.h"
 
@@ -23,12 +24,15 @@ AConGrid::AConGrid()
 		TEXT("CurveFloat'/Game/Concentration/FlipCurve.FlipCurve'"));
 	static ConstructorHelpers::FClassFinder<UConBaseUI> gameUIRef(
 		TEXT("/Game/Concentration/ConcentrationMatchUI"));
+	static ConstructorHelpers::FClassFinder<UConSettingsBaseUI> gameUISettingsRef(
+		TEXT("/Game/Concentration/ConcentrationSettingsUI"));
 	static ConstructorHelpers::FObjectFinderOptional<UParticleSystem> successPSysRef(
 		TEXT("ParticleSystem'/Game/Concentration/SuccessEffect.SuccessEffect'"));
 
 	
 	FlipCurve = curveRef.Get();
 	GameUIClass = gameUIRef.Class;
+	GameSettingsUIClass = gameUISettingsRef.Class;
 	SuccessParticleSystem = successPSysRef.Get();
 	LoadTextures();
 }
@@ -58,41 +62,67 @@ void AConGrid::LoadTextures()
 	}
 }
 
-// Called when the game starts or when spawned
-void AConGrid::BeginPlay()
+void AConGrid::LoadMatchSettings()
 {
-	Super::BeginPlay();
-
-	cards = {};
-	int32 maxRows = FMath::CeilToInt((TotalPairs * 2.f) / RowSize);
-	int32 col;
-	for (int32 row = 0; row < maxRows; ++row)
+	UConSettings* SettingsSave = Cast<UConSettings>(UGameplayStatics::LoadGameFromSlot("ConSettings", 0));
+	if (SettingsSave && !ResetSavedSettings)
 	{
-		for (col = 0; col < RowSize; ++col)
+		RowSize = SettingsSave->RowSize;
+		TotalPairs = SettingsSave->TotalPairs;
+		//cardType = SavedSettings->CardStyle;
+	}
+	else
+	{
+		SettingsSave = Cast<UConSettings>(UGameplayStatics::CreateSaveGameObject(UConSettings::StaticClass()));
+		if (SettingsSave)
 		{
-			const FVector location = FVector(
-				-row * BlockSpacing,
-				col * BlockSpacing,
-				0.f
-			) + GetActorLocation();
-			
-			//mem leaks
-			AConCard* newCard = GetWorld()->SpawnActor<AConCard>(location, FRotator(0, 0, 0));
+			SettingsSave->RowSize = RowSize;
+			SettingsSave->TotalPairs = TotalPairs;
+			SettingsSave->CardStyle = 0;//cardtype
 
-			if (newCard != nullptr)
+			if (UGameplayStatics::SaveGameToSlot(SettingsSave, "ConSettings", 0))
 			{
-				newCard->Init(FlipCurve, this);
-			}
-			cards.push_back(newCard);
-
-			if (cards.size() >= TotalPairs*2)
-			{
-				row = cards.size();
-				break;
+				//success
 			}
 		}
+		else
+		{
+			//err
+		}
 	}
-	col = RowSize < cards.size() ? RowSize : cards.size();
+
+
+	MatchedPairs.clear();
+	attempts = 0;
+	HoldingCard = nullptr;
+}
+
+void AConGrid::GenerateCard(int32 row, int32 col)
+{
+	const FVector location = FVector(
+		-row * BlockSpacing,
+		col * BlockSpacing,
+		0.f
+	) + GetActorLocation();
+
+
+	
+	cards.push_back(
+		GetWorld()->SpawnActor<AConCard>(location, FRotator(0, 0, 0)));
+
+	if (cards.back() != nullptr)
+	{
+		cards.back()->Init(FlipCurve, this);
+	}
+	else
+	{
+		cards.pop_back();
+	}
+}
+
+void AConGrid::SetCameraLocation(int32 maxRows)
+{
+	int32 col = RowSize < cards.size() ? RowSize : cards.size();
 	float cameraDistanceX = col * CameraDistancePerCardX;
 	float cameraDistanceY = maxRows * CameraDistancePerCardY;
 
@@ -101,9 +131,12 @@ void AConGrid::BeginPlay()
 		(col - 1) * 0.5f * BlockSpacing,
 		(cameraDistanceX > cameraDistanceY ? cameraDistanceX : cameraDistanceY) + CameraZOffset
 	) + GetActorLocation());
+}
 
+void AConGrid::AssignTypesAndShuffle()
+{
 	std::vector<ECardType> enumList = cardTypes;
-	
+
 	if (!ensureMsgf(enumList.size() >= cards.size() / 2, TEXT("Not enough pairs to match selected amount")))
 	{
 		return;
@@ -120,11 +153,70 @@ void AConGrid::BeginPlay()
 		cards[i]->SetType(enumList[i], texture);
 		cards[i + TotalPairs]->SetType(enumList[i], texture);
 	}
-	
-	gameUI = static_cast<UConBaseUI*>(CreateWidget(
-		GetWorld()->GetFirstPlayerController(), GameUIClass, "Game UI"));
-	gameUI->AddToViewport();
+}
+
+void AConGrid::StartupUI()
+{
+	if (gameUI)
+	{
+		gameUI->MatchQuit->SetVisibility(ESlateVisibility::Visible);
+		gameUI->EndPanel->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		gameUI = static_cast<UConBaseUI*>(CreateWidget(
+			GetWorld()->GetFirstPlayerController(), GameUIClass, "Game UI"));
+		gameUI->SettingsUIClass = GameSettingsUIClass;
+		gameUI->AddToViewport();
+		gameUI->gridRef = this;
+	}
 	gameUI->TotalPairs->SetText(FText::FromString(FString::FromInt(TotalPairs)));
+
+}
+
+// Called when the game starts or when spawned
+void AConGrid::BeginPlay()
+{
+	Super::BeginPlay();
+
+	StartMatch();
+}
+
+void AConGrid::StartMatch()
+{
+	LoadMatchSettings();
+
+	if (cards.size())
+	{
+		for (auto Card : cards)
+		{
+			if (!Card->IsPendingKill()) Card->Destroy();
+		}
+	}
+	
+	cards.clear();
+
+	int32 maxRows = FMath::CeilToInt((TotalPairs * 2.f) / RowSize);
+	int32 col;
+	for (int32 row = 0; row < maxRows; ++row)
+	{
+		for (col = 0; col < RowSize; ++col)
+		{
+			GenerateCard(row, col);
+			
+			if (cards.size() >= TotalPairs * 2)
+			{
+				row = cards.size();
+				break;
+			}
+		}
+	}
+
+	SetCameraLocation(maxRows);
+
+	AssignTypesAndShuffle();
+
+	StartupUI();
 }
 
 void AConGrid::MatchCards(AConCard& card)

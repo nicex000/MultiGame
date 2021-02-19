@@ -40,7 +40,7 @@ class AConGrid : public AActor
 	std::vector<ECardType> MatchedPairs;
 
 	/** Attempts*/
-	int attempts = 0;
+	int32 attempts = 0;
 
 	
 public:	
@@ -51,9 +51,13 @@ public:
 	UPROPERTY(Category = "Grid\|Assets", EditAnywhere, BlueprintReadWrite)
 	UCurveFloat* FlipCurve;
 
-	/** Curve for card flipping animation*/
+	/** UI class*/
 	UPROPERTY(Category = "Grid\|Assets", EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UConBaseUI> GameUIClass;
+
+	/** UI settingsclass*/
+	UPROPERTY(Category = "Grid\|Assets", EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UConSettingsBaseUI> GameSettingsUIClass;
 
 	/** Match success particle system*/
 	UPROPERTY(Category = "Grid\|Assets", EditAnywhere, BlueprintReadWrite)
@@ -70,6 +74,9 @@ public:
 	/** Spacing of blocks */
 	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
 	float BlockSpacing = 300;
+
+	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
+	bool ResetSavedSettings = false;
 
 	UPROPERTY(Category = "Grid\|Camera", EditAnywhere, BlueprintReadWrite)
 	float CameraZOffset = 1000;
@@ -94,13 +101,20 @@ public:
 
 private:
 	void LoadTextures();
+	void LoadMatchSettings();
+	void GenerateCard(int32 row, int32 col);
+	void SetCameraLocation(int32 maxRows);
+	void AssignTypesAndShuffle();
+	void StartupUI();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	/** Handle the block being clicked */
+public:
+	void StartMatch();
+	
+	/** Handle the pair reveal logic */
 	void MatchCards(AConCard& card);
 
 	void EndMatch(bool didWin);
