@@ -69,7 +69,7 @@ protected:
 	
 public:
 	void Init(UCurveFloat* flipCurve, AConGrid* owner);
-	void SetType(ECardType type, UTexture2D* texture);
+	void SetType(ECardType type, UTexture2D* frontTexture, UTexture2D* backTexture);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

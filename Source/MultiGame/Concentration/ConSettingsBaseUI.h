@@ -30,7 +30,7 @@ public:
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly)
 		USlider* TotalPairsSlider;
 	UPROPERTY(meta = (BindWidget))
-		UComboBoxString* CardTypePicker;
+		UComboBoxString* CardStylePicker;
 
 	UFUNCTION()
 		void ApplyClicked();

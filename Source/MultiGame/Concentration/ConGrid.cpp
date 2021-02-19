@@ -34,30 +34,52 @@ AConGrid::AConGrid()
 	GameUIClass = gameUIRef.Class;
 	GameSettingsUIClass = gameUISettingsRef.Class;
 	SuccessParticleSystem = successPSysRef.Get();
-	LoadTextures();
+	LoadTextures<ECardType>();
+	LoadTextures<ECardStyle>();
 }
 
+template <class T>
 void AConGrid::LoadTextures()
 {
-	cardTypes = {};
-	cardTypeTextures = {};
-	for (int32 i = 0; i <= static_cast<int32>(ECardType::SCISSORS); ++i)
+	ensure(TEXT("Invalid texture loading type"));
+}
+
+template <>
+void AConGrid::LoadTextures<ECardType>()
+{
+	LoadTextures<ECardType>(ECardType::SCISSORS, "ECardType::", "/Game/Concentration/FrontFaces/",
+		cardTypes, cardTypeTextures);
+}
+
+template <>
+void AConGrid::LoadTextures<ECardStyle>()
+{
+	LoadTextures<ECardStyle>(ECardStyle::R7, "ECardStyle::", "/Game/Concentration/BackFaces/",
+		cardStyles, cardStyleTextures);
+}
+
+template <class T>
+void AConGrid::LoadTextures(T LastItem, FString Prefix, FString Path,
+	std::vector<T>& cardList, std::map<T, UTexture2D*>& textureMap)
+{
+	cardList = {};
+	textureMap = {};
+	for (int32 i = 0; i <= static_cast<int32>(LastItem); ++i)
 	{
-		cardTypes.push_back(static_cast<ECardType>(i));
+		cardList.push_back(static_cast<T>(i));
 	}
-	
-	const FString prefix = "ECardType::";
+
 	FString ResourceString;
-	for (auto CardType : cardTypes)
+	for (auto CardType : cardList)
 	{
-		ResourceString = StaticEnum<ECardType>()->GetValueAsString(CardType);
-		ResourceString.RemoveFromStart(prefix);
+		ResourceString = StaticEnum<T>()->GetValueAsString(CardType);
+		ResourceString.RemoveFromStart(Prefix);
 		ConstructorHelpers::FObjectFinder<UTexture2D> texResource(
-			*("Texture2D'/Game/Concentration/FrontFaces/"+ ResourceString + "." + ResourceString +"'"));
+			*("Texture2D'"+ Path + ResourceString + "." + ResourceString + "'"));
 		if (texResource.Succeeded())
 		{
 			//using insert to make sure i don't overwrite anything
-			cardTypeTextures.insert({ CardType, texResource.Object });
+			textureMap.insert({ CardType, texResource.Object });
 		}
 	}
 }
@@ -69,7 +91,7 @@ void AConGrid::LoadMatchSettings()
 	{
 		RowSize = SettingsSave->RowSize;
 		TotalPairs = SettingsSave->TotalPairs;
-		//cardType = SavedSettings->CardStyle;
+		CardStyle = SettingsSave->CardStyle;
 	}
 	else
 	{
@@ -78,7 +100,7 @@ void AConGrid::LoadMatchSettings()
 		{
 			SettingsSave->RowSize = RowSize;
 			SettingsSave->TotalPairs = TotalPairs;
-			SettingsSave->CardStyle = 0;//cardtype
+			SettingsSave->CardStyle = CardStyle;
 
 			if (UGameplayStatics::SaveGameToSlot(SettingsSave, "ConSettings", 0))
 			{
@@ -147,11 +169,13 @@ void AConGrid::AssignTypesAndShuffle()
 	std::shuffle(enumList.begin(), enumList.end(), rng);
 	std::shuffle(cards.begin(), cards.end(), rng);
 
+	UTexture2D* backTexture = GetTextureOfType(CardStyle);
+
 	for (int32 i = 0; i < TotalPairs; ++i)
 	{
-		UTexture2D* texture = GetTextureOfType(enumList[i]);
-		cards[i]->SetType(enumList[i], texture);
-		cards[i + TotalPairs]->SetType(enumList[i], texture);
+		UTexture2D* frontTexture = GetTextureOfType(enumList[i]);
+		cards[i]->SetType(enumList[i], frontTexture, backTexture);
+		cards[i + TotalPairs]->SetType(enumList[i], frontTexture, backTexture);
 	}
 }
 
@@ -275,13 +299,30 @@ void AConGrid::EndMatch(bool didWin)
 		},
 		1, false, VictoryScreenDelay + VictoryFallDelay);
 }
+template <class T>
+UTexture2D* AConGrid::GetTextureOfType(T type)
+{
+	ensure(TEXT("Invalid texture type"));
+}
 
-UTexture2D* AConGrid::GetTextureOfType(ECardType type)
+template <>
+UTexture2D* AConGrid::GetTextureOfType<ECardType>(ECardType type)
 {
 	UTexture2D* texture = nullptr;
 	if (cardTypeTextures.find(type) != cardTypeTextures.end())
 	{
 		return cardTypeTextures[type];
+	}
+	return texture;
+}
+
+template <>
+UTexture2D* AConGrid::GetTextureOfType<ECardStyle>(ECardStyle type)
+{
+	UTexture2D* texture = nullptr;
+	if (cardStyleTextures.find(type) != cardStyleTextures.end())
+	{
+		return cardStyleTextures[type];
 	}
 	return texture;
 }

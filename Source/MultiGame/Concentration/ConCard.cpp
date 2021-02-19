@@ -83,12 +83,16 @@ void AConCard::Init(UCurveFloat* flipCurve, AConGrid* owner)
 	rotationTimeline.SetTimelineFinishedFunc(timelineFinishedCallback);
 }
 
-void AConCard::SetType(ECardType type, UTexture2D* texture)
+void AConCard::SetType(ECardType type, UTexture2D* frontTexture, UTexture2D* backTexture)
 {
 	Type = type;
-	if (texture != nullptr)
+	if (frontTexture != nullptr)
 	{
-		DynamicFrontMaterial->SetTextureParameterValue("Tex", texture);
+		DynamicFrontMaterial->SetTextureParameterValue("Tex", frontTexture);
+	}
+	if (backTexture != nullptr)
+	{
+		DynamicBackMaterial->SetTextureParameterValue("Tex", backTexture);
 	}
 }
 

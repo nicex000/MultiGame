@@ -29,7 +29,9 @@ class AConGrid : public AActor
 
 
 	std::vector<ECardType> cardTypes;
+	std::vector<ECardStyle> cardStyles;
 	std::map<ECardType, UTexture2D*> cardTypeTextures;
+	std::map<ECardStyle, UTexture2D*> cardStyleTextures;
 
 	UConBaseUI* gameUI;
 
@@ -71,6 +73,10 @@ public:
 	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
 	int32 TotalPairs = 8;
 
+	/** Card style */
+	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
+	ECardStyle CardStyle = ECardStyle::B1;
+
 	/** Spacing of blocks */
 	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
 	float BlockSpacing = 300;
@@ -100,7 +106,16 @@ public:
 	float VictoryScreenDelay = 1.f;
 
 private:
+	template <class T>
 	void LoadTextures();
+	template <>
+	void LoadTextures<ECardType>();
+	template <>
+	void LoadTextures<ECardStyle>();
+	template <class T>
+	void LoadTextures(T LastItem, FString Prefix, FString Path,
+		std::vector<T>& cardList, std::map<T, UTexture2D*>& textureMap);
+	
 	void LoadMatchSettings();
 	void GenerateCard(int32 row, int32 col);
 	void SetCameraLocation(int32 maxRows);
@@ -122,6 +137,11 @@ public:
 	/** Returns DummyRoot subobject **/
 	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }
 
-	UTexture2D* GetTextureOfType(ECardType type);
+	template <class T>
+	UTexture2D* GetTextureOfType(T type);
+	template <>
+	UTexture2D* GetTextureOfType<ECardType>(ECardType type);
+	template <>
+	UTexture2D* GetTextureOfType<ECardStyle>(ECardStyle type);
 
 };

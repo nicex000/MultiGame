@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CardType.h"
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,7 +25,7 @@ public:
     UPROPERTY(VisibleAnywhere, Category = Basic)
         uint32 TotalPairs;
     UPROPERTY(VisibleAnywhere, Category = Basic)
-        uint32 CardStyle;
+        ECardStyle CardStyle;
 
     UConSettings();
 	
