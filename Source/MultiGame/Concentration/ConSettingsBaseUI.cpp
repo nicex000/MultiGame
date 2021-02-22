@@ -10,14 +10,15 @@ void UConSettingsBaseUI::NativeConstruct()
 	ApplyBtn->OnClicked.AddDynamic(this, &UConSettingsBaseUI::ApplyClicked);
 	
 	UConSettings* SettingsSave = Cast<UConSettings>(UGameplayStatics::LoadGameFromSlot("ConSettings", 0));
+
+	for (int32 i = 0; i < static_cast<int32>(ECardStyle::R7); i++)
+		CardStylePicker->AddOption(StaticEnum<ECardStyle>()->GetEnumText(i).ToString());
+	CardStylePicker->SetSelectedIndex(0);
+	
 	if (SettingsSave)
 	{
 		RowSizeSlider->SetValue(SettingsSave->RowSize);
 		TotalPairsSlider->SetValue(SettingsSave->TotalPairs);
-
-		for (int32 i = 0; i < static_cast<int32>(ECardStyle::R7); i++)
-			CardStylePicker->AddOption(StaticEnum<ECardStyle>()->GetEnumText(i).ToString());
-
 		CardStylePicker->SetSelectedIndex(static_cast<int32>(SettingsSave->CardStyle));
 	}
 }

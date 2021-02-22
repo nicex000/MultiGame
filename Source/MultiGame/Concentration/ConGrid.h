@@ -10,6 +10,7 @@
 #include "CoreMinimal.h"
 #include "ConCard.h"
 #include "Curves/CurveFloat.h"
+#include "Camera/CameraActor.h"
 #include "Engine/Texture2D.h"
 #include "Particles/ParticleSystem.h"
 #include "GameFramework/Actor.h"
@@ -84,6 +85,9 @@ public:
 	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
 	bool ResetSavedSettings = false;
 
+	UPROPERTY(Category = "Grid\|Camera", EditAnywhere, BlueprintReadWrite)
+	ACameraActor* CameraRef;
+	
 	UPROPERTY(Category = "Grid\|Camera", EditAnywhere, BlueprintReadWrite)
 	float CameraZOffset = 1000;
 

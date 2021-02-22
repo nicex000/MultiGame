@@ -148,7 +148,7 @@ void AConGrid::SetCameraLocation(int32 maxRows)
 	float cameraDistanceX = col * CameraDistancePerCardX;
 	float cameraDistanceY = maxRows * CameraDistancePerCardY;
 
-	GetWorld()->GetFirstPlayerController()->GetViewTarget()->SetActorLocation(FVector(
+	CameraRef->SetActorLocation(FVector(
 		-(maxRows - 1) * 0.5f * BlockSpacing,
 		(col - 1) * 0.5f * BlockSpacing,
 		(cameraDistanceX > cameraDistanceY ? cameraDistanceX : cameraDistanceY) + CameraZOffset
