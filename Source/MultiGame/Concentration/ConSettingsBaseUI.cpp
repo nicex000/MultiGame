@@ -11,15 +11,15 @@ void UConSettingsBaseUI::NativeConstruct()
 	
 	UConSettings* SettingsSave = Cast<UConSettings>(UGameplayStatics::LoadGameFromSlot("ConSettings", 0));
 
-	for (int32 i = 0; i < static_cast<int32>(ECardStyle::R7); i++)
-		CardStylePicker->AddOption(StaticEnum<ECardStyle>()->GetEnumText(i).ToString());
+	for (auto item : ECardStyle::Values)
+		CardStylePicker->AddOption(item.second);
 	CardStylePicker->SetSelectedIndex(0);
 	
 	if (SettingsSave)
 	{
 		RowSizeSlider->SetValue(SettingsSave->RowSize);
 		TotalPairsSlider->SetValue(SettingsSave->TotalPairs);
-		CardStylePicker->SetSelectedIndex(static_cast<int32>(SettingsSave->CardStyle));
+		CardStylePicker->SetSelectedIndex(SettingsSave->CardStyle);
 	}
 }
 
@@ -30,7 +30,7 @@ void UConSettingsBaseUI::ApplyClicked()
 	{
 		SettingsSave->RowSize = RowSizeSlider->GetValue();
 		SettingsSave->TotalPairs = TotalPairsSlider->GetValue();
-		SettingsSave->CardStyle = static_cast<ECardStyle>(CardStylePicker->GetSelectedIndex());
+		SettingsSave->CardStyle = CardStylePicker->GetSelectedIndex();
 
 		if (UGameplayStatics::SaveGameToSlot(SettingsSave, "ConSettings", 0))
 		{

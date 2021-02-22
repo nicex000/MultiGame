@@ -47,7 +47,7 @@ public:
 	AConCard();
 	
 	UPROPERTY()
-		ECardType Type;
+		int32 Type;
 
 	/** Grid that owns us */
 	UPROPERTY()
@@ -69,7 +69,7 @@ protected:
 	
 public:
 	void Init(UCurveFloat* flipCurve, AConGrid* owner);
-	void SetType(ECardType type, UTexture2D* frontTexture, UTexture2D* backTexture);
+	void SetType(int32 type, UTexture2D* frontTexture, UTexture2D* backTexture);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

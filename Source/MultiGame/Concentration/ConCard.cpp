@@ -83,7 +83,7 @@ void AConCard::Init(UCurveFloat* flipCurve, AConGrid* owner)
 	rotationTimeline.SetTimelineFinishedFunc(timelineFinishedCallback);
 }
 
-void AConCard::SetType(ECardType type, UTexture2D* frontTexture, UTexture2D* backTexture)
+void AConCard::SetType(int32 type, UTexture2D* frontTexture, UTexture2D* backTexture)
 {
 	Type = type;
 	if (frontTexture != nullptr)

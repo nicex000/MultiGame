@@ -25,7 +25,7 @@ public:
     UPROPERTY(VisibleAnywhere, Category = Basic)
         uint32 TotalPairs;
     UPROPERTY(VisibleAnywhere, Category = Basic)
-        ECardStyle CardStyle;
+        uint32 CardStyle;
 
     UConSettings();
 	

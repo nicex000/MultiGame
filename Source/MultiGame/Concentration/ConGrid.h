@@ -29,10 +29,8 @@ class AConGrid : public AActor
 	class USceneComponent* DummyRoot;
 
 
-	std::vector<ECardType> cardTypes;
-	std::vector<ECardStyle> cardStyles;
-	std::map<ECardType, UTexture2D*> cardTypeTextures;
-	std::map<ECardStyle, UTexture2D*> cardStyleTextures;
+	std::vector<UTexture2D*> cardTypeTextures;
+	std::vector<UTexture2D*> cardStyleTextures;
 
 	UConBaseUI* gameUI;
 
@@ -40,7 +38,7 @@ class AConGrid : public AActor
 	std::vector<AConCard*> cards;
 	
 	/** Successful pairs */
-	std::vector<ECardType> MatchedPairs;
+	std::vector<int32> MatchedPairs;
 
 	/** Attempts*/
 	int32 attempts = 0;
@@ -76,7 +74,7 @@ public:
 
 	/** Card style */
 	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
-	ECardStyle CardStyle = ECardStyle::B1;
+	int32 CardStyleIndex = 0;
 
 	/** Spacing of blocks */
 	UPROPERTY(Category = "Grid\|Spawn", EditAnywhere, BlueprintReadWrite)
@@ -117,8 +115,7 @@ private:
 	template <>
 	void LoadTextures<ECardStyle>();
 	template <class T>
-	void LoadTextures(T LastItem, FString Prefix, FString Path,
-		std::vector<T>& cardList, std::map<T, UTexture2D*>& textureMap);
+	void LoadTextures(const WannabeEnum& values, FString Path, std::vector<UTexture2D*>& textureMap);
 	
 	void LoadMatchSettings();
 	void GenerateCard(int32 row, int32 col);
@@ -142,10 +139,10 @@ public:
 	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }
 
 	template <class T>
-	UTexture2D* GetTextureOfType(T type);
+	UTexture2D* GetTextureOfType(int32 index);
 	template <>
-	UTexture2D* GetTextureOfType<ECardType>(ECardType type);
+	UTexture2D* GetTextureOfType<ECardType>(int32 index);
 	template <>
-	UTexture2D* GetTextureOfType<ECardStyle>(ECardStyle type);
+	UTexture2D* GetTextureOfType<ECardStyle>(int32 index);
 
 };
